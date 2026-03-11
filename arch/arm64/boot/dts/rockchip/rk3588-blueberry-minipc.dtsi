@@ -185,26 +185,34 @@
 };
 
 &dp0 {
-	status = "disable";
+	status = "okay";
 };
 
-//&dp0_in_vp1 {
+&dp0_in_vp1 {
+	status = "okay";
+};
+
+&dp0_sound{
+	status = "okay";
+};
+
+//&dp1 {
+//	pinctrl-0 = <&dp1m0_pins>;
+//	pinctrl-names = "default";
 //	status = "okay";
 //};
 
-&dp1 {
-	pinctrl-0 = <&dp1m0_pins>;
-	pinctrl-names = "default";
-	status = "okay";
-};
+//&dp1_in_vp1 {
+//	status = "okay";
+//};
 
-&dp1_in_vp1 {
-	status = "okay";
-};
+//&dp1_sound{
+//	status = "okay";
+//};
 
-&dp1_sound{
-	status = "okay";
-};
+//&spdif_tx5 {
+//	status = "okay";
+//};
 
 &gmac0 {
 	/* Use rgmii-rxid mode to disable rx delay inside Soc */
@@ -275,7 +283,9 @@
 	#sound-dai-cells = <1>;
 	/* Effective level used to trigger HPD: 0-low, 1-high */
 	hpd-trigger-level = <1>;
-	hdmirx-det-gpios = <&gpio1 29 GPIO_ACTIVE_LOW>;   //gpio1_d5
+	hdmirx-det-gpios = <&gpio1 RK_PD5 GPIO_ACTIVE_LOW>;   //gpio1_d5
+	pinctrl-names = "default";
+	pinctrl-0 = <&hdmim1_rx &hdmirx_det>;
 };
 
 &i2c0 {
@@ -587,6 +597,12 @@
 			rockchip,pins = <1 RK_PD3 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
+	
+	hdmi {
+		hdmirx_det: hdmirx-det {
+			rockchip,pins = <1 RK_PD5 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};	
 
 	hym8563 {
 		hym8563_int: hym8563-int {
