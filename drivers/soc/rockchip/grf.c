@@ -243,9 +243,11 @@ static const struct rockchip_grf_info rk3566_pipegrf __initconst = {
 };
 
 #define RK3588_SYS_GRF_SOC_CON7		0x031c
+#define RK3588_SYS_GRF_SOC_CON6		0x0318
 
 static const struct rockchip_grf_value rk3588_sys_grf_defaults[] __initconst = {
 	{ "Connect EDP hpd to IO", RK3588_SYS_GRF_SOC_CON7, HIWORD_UPDATE(0x3, 0x3, 14) },
+	{ "jtag sitching", RK3588_SYS_GRF_SOC_CON6, HIWORD_UPDATE(0x0, 0x1, 14) },
 };
 
 static const struct rockchip_grf_info rk3588_sys_grf __initconst = {
