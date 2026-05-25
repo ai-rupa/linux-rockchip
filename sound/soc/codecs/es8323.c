@@ -402,8 +402,8 @@ static const struct _coeff_div coeff_div[] = {
 	{12000000, 22050, 544, 0x6, 0x1},
 
 	/* 32k */
-	{8192000, 32000, 256, 0x2, 0x0},
-	{16384000, 32000, 512, 0x4, 0x0},
+	{8192000, 16000, 256, 0x2, 0x0},
+	{16384000, 16000, 512, 0x4, 0x0},
 	{12288000, 32000, 384, 0x3, 0x0},
 	{18432000, 32000, 576, 0x5, 0x0},
 	{12000000, 32000, 375, 0x4, 0x1},
@@ -790,17 +790,17 @@ static int es8323_probe(struct snd_soc_component *component)
 	snd_soc_component_write(component, 0x06, 0xC3);
 	snd_soc_component_write(component, 0x19, 0x02);
 	snd_soc_component_write(component, 0x09, 0x00);
-	snd_soc_component_write(component, 0x0A, 0xf8);
-	snd_soc_component_write(component, 0x0B, 0x82);
-	snd_soc_component_write(component, 0x0C, 0x0C);
+	snd_soc_component_write(component, 0x0A, 0x00);
+	snd_soc_component_write(component, 0x0B, 0x02);
+	snd_soc_component_write(component, 0x0C, 0x4C);
 	snd_soc_component_write(component, 0x0D, 0x02);
 	snd_soc_component_write(component, 0x10, 0x00);
 	snd_soc_component_write(component, 0x11, 0x00);
-	snd_soc_component_write(component, 0x12, 0x00);
+	snd_soc_component_write(component, 0x12, 0xea);
 	snd_soc_component_write(component, 0x13, 0xc0);
 	snd_soc_component_write(component, 0x14, 0x05);
 	snd_soc_component_write(component, 0x15, 0x06);
-	snd_soc_component_write(component, 0x16, 0x52);
+	snd_soc_component_write(component, 0x16, 0x53);
 
 	snd_soc_component_write(component, 0x17, 0x18);
 	snd_soc_component_write(component, 0x18, 0x02);
@@ -808,6 +808,7 @@ static int es8323_probe(struct snd_soc_component *component)
 	snd_soc_component_write(component, 0x1B, 0x00);
 	snd_soc_component_write(component, 0x27, 0xB8);
 	snd_soc_component_write(component, 0x2A, 0xB8);
+	snd_soc_component_write(component, 0x35, 0xA0);
 	usleep_range(18000, 20000);
 	snd_soc_component_write(component, 0x2E, 0x1E);
 	snd_soc_component_write(component, 0x2F, 0x1E);
