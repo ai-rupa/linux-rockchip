@@ -64,7 +64,7 @@ DHDCFLAGS = -Wall -Wstrict-prototypes -Wno-date-time -Wno-strict-prototypes   \
 	-DPOWERUP_MAX_RETRY=0 -DIFACE_HANG_FORCE_DEV_CLOSE -DWAIT_DEQUEUE     \
 	-DUSE_NEW_RSPEC_DEFS                                                  \
 	-DWL_EXT_IAPSTA -DWL_ESCAN -DCCODE_LIST -DSUSPEND_EVENT               \
-	-DKEY_INSTALL_CHECK                                                   \
+	-DKEY_INSTALL_CHECK  -DCUSTOMER_HW_ROCKCHIP                                                 \
 	-DENABLE_INSMOD_NO_FW_LOAD
 
 DHDCFLAGS += -Wframe-larger-than=2048
@@ -416,7 +416,7 @@ endif
 	DHDCFLAGS += -DCUSTOMER_HW -DDHD_OF_SUPPORT
 	DHDCFLAGS += -DCUSTOMER_HW_ROCKCHIP
 	DHDCFLAGS += -DBCM_USE_PLATFORM_STRLCPY
-#	DHDCFLAGS += -DGET_CUSTOM_MAC_ENABLE
+	DHDCFLAGS += -DGET_CUSTOM_MAC_ENABLE
 endif
 
 ifneq ($(CONFIG_BCMDHD_PCIE),)

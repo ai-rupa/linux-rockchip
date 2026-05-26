@@ -182,7 +182,14 @@ dhd_wlan_get_mac_addr(unsigned char *buf, int ifidx)
 #endif /* EXAMPLE_GET_MAC_VER2 */
 
 	printf("======== %s err=%d ========\n", __FUNCTION__, err);
-
+	printk("======== %s err=%d ========\n", __FUNCTION__, err);
+	printk("======== %s buf=%s ========\n", __FUNCTION__, buf);
+	if (err == -1){
+		struct ether_addr ea_example = {{0x00, 0x11, 0x22, 0x33, 0x44, 0xFF}};
+		bcopy((char *)&ea_example, buf, sizeof(struct ether_addr));
+		printk("======== %s buf=%s ========\n", __FUNCTION__, buf);
+		err = 0;
+	}
 	return err;
 }
 
