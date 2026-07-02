@@ -31,6 +31,8 @@ struct mmc_pwrseq_simple {
 	struct gpio_descs *reset_gpios;
 };
 
+struct gpio_descs *g_reset_gpios;
+
 #define to_pwrseq_simple(p) container_of(p, struct mmc_pwrseq_simple, pwrseq)
 
 static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
@@ -57,6 +59,34 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
 		bitmap_free(values);
 	}
 }
+void extern_mmc_pwrseq_simple_set_gpios_value(int value)
+{
+	struct gpio_descs *reset_gpios = g_reset_gpios;
+
+	if (!IS_ERR(reset_gpios)) {
+		unsigned long *values;
+		int nvalues = reset_gpios->ndescs;
+
+		values = bitmap_alloc(nvalues, GFP_KERNEL);
+		if (!values)
+			return;
+
+		if (value)
+			bitmap_fill(values, nvalues);
+		else
+			bitmap_zero(values, nvalues);
+
+		gpiod_set_array_value_cansleep(nvalues, reset_gpios->desc,
+					       reset_gpios->info, values);
+
+		kfree(values);
+
+		
+ 	}
+	printk("%s %d fjh value %d", __func__, __LINE__, value);
+ }
+
+EXPORT_SYMBOL(extern_mmc_pwrseq_simple_set_gpios_value);
 
 static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
 {
@@ -123,6 +153,7 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
 
 	pwrseq->reset_gpios = devm_gpiod_get_array(dev, "reset",
 							GPIOD_OUT_HIGH);
+	g_reset_gpios = pwrseq->reset_gpios;
 	if (IS_ERR(pwrseq->reset_gpios) &&
 	    PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
 	    PTR_ERR(pwrseq->reset_gpios) != -ENOSYS) {

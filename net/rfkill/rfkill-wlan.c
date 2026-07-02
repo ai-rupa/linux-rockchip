@@ -172,11 +172,13 @@ void *rockchip_mem_prealloc(int section, unsigned long size)
 #endif
 EXPORT_SYMBOL(rockchip_mem_prealloc);
 
+extern extern_mmc_pwrseq_simple_set_gpios_value(int value);
+
 int rfkill_set_wifi_bt_power(int on)
 {
 	struct rfkill_wlan_data *mrfkill = g_rfkill;
 	struct rksdmmc_gpio *vbat;
-
+	static int first_init = 0;
 	LOG("%s: %d\n", __func__, on);
 
 	if (!mrfkill) {
@@ -185,6 +187,13 @@ int rfkill_set_wifi_bt_power(int on)
 		return -1;
 	}
 
+	if (!first_init){
+		extern_mmc_pwrseq_simple_set_gpios_value(0);
+		rockchip_wifi_power(1);
+		LOG("%s: first_init 20240924\n",
+		    __func__);
+	}
+	
 	vbat = &mrfkill->pdata->vbat_n;
 	if (on) {
 		if (gpio_is_valid(vbat->io))
@@ -209,6 +218,13 @@ int rfkill_get_wifi_power_state(int *power)
 	if (!mrfkill) {
 		LOG("%s: rfkill-wlan driver has not Successful initialized\n",
 		    __func__);
+			
+		extern_mmc_pwrseq_simple_set_gpios_value(0);
+		msleep(200);
+		extern_mmc_pwrseq_simple_set_gpios_value(1);
+		msleep(200);
+		extern_mmc_pwrseq_simple_set_gpios_value(0);
+
 		return -1;
 	}
 
@@ -238,6 +254,12 @@ int rockchip_wifi_power(int on)
 	if (!mrfkill) {
 		LOG("%s: rfkill-wlan driver has not Successful initialized\n",
 		    __func__);
+			
+		LOG("%s: fjh try extern reset\n", __func__);
+		extern_mmc_pwrseq_simple_set_gpios_value(1);
+		msleep(200);
+		extern_mmc_pwrseq_simple_set_gpios_value(0);
+
 		return -1;
 	}
 
@@ -301,6 +323,8 @@ int rockchip_wifi_power(int on)
 			}
 
 			if (gpio_is_valid(reset->io)) {
+				gpio_direction_output(reset->io, !reset->enable);
+				msleep(100);
 				gpio_direction_output(reset->io, reset->enable);
 				msleep(100);
 			}
@@ -863,10 +887,10 @@ static int rfkill_wlan_probe(struct platform_device *pdev)
 		if (ret)
 			goto fail_alloc;
 
-		ret = rfkill_rk_setup_gpio(&pdata->reset_n, wlan_name,
+		/*ret = rfkill_rk_setup_gpio(&pdata->reset_n, wlan_name,
 					   "wlan_reset");
 		if (ret)
-			goto fail_alloc;
+			goto fail_alloc;*/
 	}
 
 	wake_lock_init(&rfkill->wlan_irq_wl, WAKE_LOCK_SUSPEND,
