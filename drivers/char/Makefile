@@ -47,3 +47,5 @@ obj-$(CONFIG_POWERNV_OP_PANEL)	+= powernv-op-panel.o
 obj-$(CONFIG_ADI)		+= adi.o
 #fox.luo@add vk2c21 lcd driver
 obj-y	+= lcd_vk2c21.o
+obj-y	+= led_ht1628.o
+
