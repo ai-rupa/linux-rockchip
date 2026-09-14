@@ -3,7 +3,7 @@
 # Makefile for the Linux Bluetooth HCI device drivers.
 #
 #ccflags-y += -Iseekwave_ea6621q/include/linux/platform_data/
-ccflags-y += -I$(srctree)/include/linux/platform_data/
+ccflags-y += -I$(srctree)/drivers/net/wireless/swt6621s_new/include/linux/platform_data/
 
 ifneq ($(skw_extra_flags),)
 ccflags-y += $(skw_extra_flags)

@@ -55,7 +55,7 @@ ifneq ($(skw_extra_symbols),)
 KBUILD_EXTRA_SYMBOLS += $(skw_extra_symbols)
 endif
 
-ccflags-y += -I$(srctree)/include/linux/platform_data/
+ccflags-y += -I$(srctree)/drivers/net/wireless/swt6621s_new/include/linux/platform_data/
 
 CFLAGS_trace.o := -I$(src)
 $(obj)/skw_core.o : $(obj)/version.h
