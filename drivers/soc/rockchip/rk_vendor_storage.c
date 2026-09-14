@@ -11,6 +11,9 @@
 #include <linux/module.h>
 #include <linux/soc/rockchip/rk_vendor_storage.h>
 
+/* Trigger re-probe of consumers that are waiting for vendor storage */
+extern void driver_deferred_probe_trigger(void);
+
 static int (*_vendor_read)(u32 id, void *pbuf, u32 size);
 static int (*_vendor_write)(u32 id, void *pbuf, u32 size);
 
@@ -34,6 +37,9 @@ int rk_vendor_register(void *read, void *write)
 {
 	_vendor_read = read;
 	_vendor_write =  write;
+
+	/* Wake consumers (e.g. dwmac-rk) that deferred probe until ready */
+	driver_deferred_probe_trigger();
 
 	return 0;
 }

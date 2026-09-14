@@ -183,6 +183,17 @@ config DWMAC_ROCKCHIP_TOOL
 	  This selects the features for Rockchip's Ethernet, include PHY loopback,
 	  MAC loopback, and delayline scanning of RGMII mode.
 
+config DWMAC_ROCKCHIP_VENDOR_MAC
+	bool "Prefer MAC address from Rockchip vendor storage"
+	depends on DWMAC_ROCKCHIP && ROCKCHIP_VENDOR_STORAGE
+	default n
+	help
+	  When enabled, the Rockchip dwmac driver will read the Ethernet MAC
+	  address from Rockchip vendor storage (LAN_MAC_ID) and use it even if
+	  the device tree provides a local-mac-address property. If vendor
+	  storage does not contain a valid MAC, the driver falls back to the
+	  device tree value or generates a random MAC and saves it.
+
 config DWMAC_SOCFPGA
 	tristate "SOCFPGA dwmac support"
 	default ARCH_INTEL_SOCFPGA

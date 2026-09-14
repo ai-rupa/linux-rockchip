@@ -3042,6 +3042,38 @@ int dwmac_rk_get_phy_interface(struct stmmac_priv *priv)
 }
 EXPORT_SYMBOL(dwmac_rk_get_phy_interface);
 
+#ifdef CONFIG_DWMAC_ROCKCHIP_VENDOR_MAC
+static int rk_read_vendor_mac(struct device *dev, int id, unsigned char *addr)
+{
+	unsigned char ethaddr[ETH_ALEN * MAX_ETH] = {0};
+	int ret, retries = 30;
+
+	if (id < 0 || id >= MAX_ETH) {
+		dev_err(dev, "%s: Invalid ethernet bus id %d\n", __func__, id);
+		return -EINVAL;
+	}
+
+	while (retries-- > 0) {
+		if (is_rk_vendor_ready())
+			break;
+		/* sleep 100ms wait rk vendor driver ready */
+		msleep(100);
+	}
+
+	ret = rk_vendor_read(LAN_MAC_ID, ethaddr, ETH_ALEN * MAX_ETH);
+	if (ret > 0 && is_valid_ether_addr(&ethaddr[id * ETH_ALEN])) {
+		memcpy(addr, &ethaddr[id * ETH_ALEN], ETH_ALEN);
+		dev_info(dev, "%s: mac address from vendor_storage: %pM\n",
+			 __func__, addr);
+		return 0;
+	}
+
+	dev_err(dev, "%s: rk_vendor_read eth mac address failed (%d)\n",
+		__func__, ret);
+	return -EINVAL;
+}
+#endif
+
 static void rk_get_eth_addr(void *priv, unsigned char *addr)
 {
 	struct rk_priv_data *bsp_priv = priv;
@@ -3049,38 +3081,54 @@ static void rk_get_eth_addr(void *priv, unsigned char *addr)
 	unsigned char ethaddr[ETH_ALEN * MAX_ETH] = {0};
 	int ret, id = bsp_priv->id;
 
-	if (is_valid_ether_addr(addr))
-		goto out;
-
 	if (id < 0 || id >= MAX_ETH) {
 		dev_err(dev, "%s: Invalid ethernet bus id %d\n", __func__, id);
 		return;
 	}
 
-	ret = rk_vendor_read(LAN_MAC_ID, ethaddr, ETH_ALEN * MAX_ETH);
-	if (ret <= 0 ||
-	    !is_valid_ether_addr(&ethaddr[id * ETH_ALEN])) {
-		dev_err(dev, "%s: rk_vendor_read eth mac address failed (%d)\n",
-			__func__, ret);
-		eth_random_addr(&ethaddr[id * ETH_ALEN]);
-		memcpy(addr, &ethaddr[id * ETH_ALEN], ETH_ALEN);
-		dev_err(dev, "%s: generate random eth mac address: %pM\n", __func__, addr);
+	/* Prefer MAC from Rockchip vendor storage over DTB local-mac-address */
+#ifdef CONFIG_DWMAC_ROCKCHIP_VENDOR_MAC
+	{
+		int retries = 30;
 
-		ret = rk_vendor_write(LAN_MAC_ID, ethaddr, ETH_ALEN * MAX_ETH);
-		if (ret != 0)
-			dev_err(dev, "%s: rk_vendor_write eth mac address failed (%d)\n",
-				__func__, ret);
-
-		ret = rk_vendor_read(LAN_MAC_ID, ethaddr, ETH_ALEN * MAX_ETH);
-		if (ret != ETH_ALEN * MAX_ETH)
-			dev_err(dev, "%s: id: %d rk_vendor_read eth mac address failed (%d)\n",
-				__func__, id, ret);
-	} else {
-		memcpy(addr, &ethaddr[id * ETH_ALEN], ETH_ALEN);
+		while (retries-- > 0) {
+			if (is_rk_vendor_ready())
+				break;
+			/* sleep 100ms wait rk vendor driver ready */
+			msleep(100);
+		}
 	}
 
-out:
-	dev_err(dev, "%s: mac address: %pM\n", __func__, addr);
+	ret = rk_vendor_read(LAN_MAC_ID, ethaddr, ETH_ALEN * MAX_ETH);
+	if (ret > 0 && is_valid_ether_addr(&ethaddr[id * ETH_ALEN])) {
+		memcpy(addr, &ethaddr[id * ETH_ALEN], ETH_ALEN);
+		dev_info(dev, "%s: mac address from vendor_storage: %pM\n",
+			 __func__, addr);
+		return;
+	}
+#endif
+
+	if (is_valid_ether_addr(addr)) {
+		dev_info(dev, "%s: mac address from dtb: %pM\n", __func__, addr);
+		return;
+	}
+
+	dev_err(dev, "%s: rk_vendor_read eth mac address failed (%d)\n",
+		__func__, ret);
+	eth_random_addr(&ethaddr[id * ETH_ALEN]);
+	memcpy(addr, &ethaddr[id * ETH_ALEN], ETH_ALEN);
+	dev_err(dev, "%s: generate random eth mac address: %pM\n",
+		__func__, addr);
+
+	ret = rk_vendor_write(LAN_MAC_ID, ethaddr, ETH_ALEN * MAX_ETH);
+	if (ret != 0)
+		dev_err(dev, "%s: rk_vendor_write eth mac address failed (%d)\n",
+			__func__, ret);
+
+	ret = rk_vendor_read(LAN_MAC_ID, ethaddr, ETH_ALEN * MAX_ETH);
+	if (ret != ETH_ALEN * MAX_ETH)
+		dev_err(dev, "%s: id: %d rk_vendor_read eth mac address failed (%d)\n",
+			__func__, id, ret);
 }
 
 static int rk_gmac_probe(struct platform_device *pdev)
@@ -3095,6 +3143,13 @@ static int rk_gmac_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "no of match data provided\n");
 		return -EINVAL;
 	}
+
+#ifdef CONFIG_DWMAC_ROCKCHIP_VENDOR_MAC
+	if (!is_rk_vendor_ready()) {
+		dev_info(&pdev->dev, "rk vendor storage not ready, defer gmac probe\n");
+		return -EPROBE_DEFER;
+	}
+#endif
 
 	ret = stmmac_get_platform_resources(pdev, &stmmac_res);
 	if (ret)
@@ -3121,6 +3176,13 @@ static int rk_gmac_probe(struct platform_device *pdev)
 		ret = PTR_ERR(plat_dat->bsp_priv);
 		goto err_remove_config_dt;
 	}
+
+#ifdef CONFIG_DWMAC_ROCKCHIP_VENDOR_MAC
+	/* Override DTB local-mac-address with vendor_storage LAN MAC */
+	rk_read_vendor_mac(&pdev->dev,
+			   ((struct rk_priv_data *)plat_dat->bsp_priv)->id,
+			   stmmac_res.mac);
+#endif
 
 	rk_gmac_csu_init(plat_dat);
 
