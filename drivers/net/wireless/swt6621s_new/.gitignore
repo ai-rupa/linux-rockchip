@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# kbuild outputs generated when this driver is built in-tree.
+# Follows the same convention as drivers/net/wireless/aic8800_sdio/.
+#
+*.o
+*.o.cmd
+*.ko
+*.ko.cmd
+*.mod
+*.mod.c
+*.mod.cmd
+*.order
+*.order.cmd
+*.symvers
+*.symvers.cmd
+.tmp_versions/

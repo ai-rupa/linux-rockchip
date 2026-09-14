@@ -1,1 +1,0 @@
-cmd_/mnt/hugsun_data/fang_work0/rockchip/rk3588/rk_linux_6.1_open/external/rkwifibt/drivers/swt6621s_new/modules.order := {   cat /mnt/hugsun_data/fang_work0/rockchip/rk3588/rk_linux_6.1_open/external/rkwifibt/drivers/swt6621s_new/drivers/modules.order; :; } > /mnt/hugsun_data/fang_work0/rockchip/rk3588/rk_linux_6.1_open/external/rkwifibt/drivers/swt6621s_new/modules.order
