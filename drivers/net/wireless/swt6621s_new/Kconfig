@@ -1,0 +1,25 @@
+config WLAN_VENDOR_SWT6621S
+	tristate "SeekWave swt6621s support"
+	depends on WLAN
+	help
+	  This option adds support for the SeekWave swt6621s SDIO WiFi driver.
+
+	  Say Y to include support for swt6621s WiFi chips.
+
+config SKW_SDIOHAL
+	tristate "SKW SDIO Host Driver"
+	depends on WLAN_VENDOR_SWT6621S && MMC
+	help
+	  SDIO host interface driver for SeekWave WiFi chips.
+
+config SKW_BSP_BOOT
+	tristate "SKW BSP Boot Driver"
+	depends on WLAN_VENDOR_SWT6621S
+	help
+	  BSP boot driver for SeekWave WiFi chips.
+
+config SKW_BT
+	tristate "SKW Bluetooth Driver"
+	depends on WLAN_VENDOR_SWT6621S && BT
+	help
+	  Bluetooth driver for SeekWave WiFi/BT combo chips.
