@@ -50,12 +50,13 @@
 		vin-supply = <&vcc_3v3_s3>;
 	};*/
 	
-	/*sdio_pwrseq: sdio-pwrseq {
+	sdio_pwrseq: sdio-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		pinctrl-names = "default";
 		pinctrl-0 = <&wifi_enable_h>;
 		reset-gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_LOW>;
-	};*/
+		post-power-on-delay-ms = <100>;
+	};
 
 	wireless_bluetooth: wireless-bluetooth {
 		compatible = "bluetooth-platdata";
@@ -73,10 +74,9 @@
 		compatible = "wlan-platdata";
 		rockchip,grf = <&grf>;
 		wifi_chip_type = "";
-		pinctrl-names = "default";
-		pinctrl-0 = <&wifi_enable_h>;
 		//WIFI,host_wake_irq = <&gpio3 RK_PB3 GPIO_ACTIVE_HIGH>;
-		WIFI,poweren_gpio = <&gpio3 RK_PB2  GPIO_ACTIVE_HIGH>;
+		// WIFI 电源 GPIO3_PB2 由 sdio_pwrseq(reset-gpios) 在 mmc0 首次扫描前接管拉高,
+		// 此处不再重复申请同一 GPIO(pinctrl/poweren),避免双 owner/上电时序问题
 		status = "okay";
 	};
 
@@ -111,10 +111,15 @@
 			linux,default-trigger = "none";
 			default-state = "off";
 		};
+		led-blue {
+			gpios = <&gpio4 RK_PC1 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "none";
+			default-state = "off";
+		};
 		pwr-green {
 			gpios = <&gpio4 RK_PB3 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "none";
-			default-state = "off";
+			default-state = "on";
 			retain-state-suspended;
 			retain-state-shutdown;
 		};
@@ -138,7 +143,7 @@
 	cap-sdio-irq;
 	keep-power-in-suspend;
 	non-removable;
-	//mmc-pwrseq = <&sdio_pwrseq>;
+	mmc-pwrseq = <&sdio_pwrseq>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&sdio1_bus4 &sdio1_cmd &sdio1_clk>;
 	/delete-property/ rockchip,use-v2-tuning;
