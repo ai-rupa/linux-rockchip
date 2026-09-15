@@ -12,7 +12,6 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += px30-evb-ddr3-v11-linux.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += px30-evb-ddr4-v10.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += px30-evb-ddr4-v10-linux.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk35x8-hugsun-x88pro-ddr4-v10.dtb
-dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3528-hugsun-x88pro-ddr4-v10.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3528-hugsun-x88pro-ddr4-v10-1000M.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3528-hugsun-x88pro-ddr4-v10-dongle.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3528-hugsun-x88pro-ddr4-v10-mini.dtb
